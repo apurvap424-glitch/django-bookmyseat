@@ -1,0 +1,34 @@
+{% extends "users/basic.html" %}
+
+{% block content %}
+
+<h1>Seats for {{ theater.name }} - {{ theater.movie.name }}</h1>
+
+{% if error_message %}
+    <p style="color:red;"><strong>{{ error_message }}</strong></p>
+{% endif %}
+
+<form method="POST">
+    {% csrf_token %}
+
+    <ul>
+        {% for seat in seats %}
+        <li>
+            {% if seat.is_booked %}
+                Seat {{ seat.seat_number }} :
+                <strong style="color:red;">Booked</strong>
+            {% else %}
+                <label>
+                    <input type="checkbox" name="seats" value="{{ seat.id }}">
+                    Seat {{ seat.seat_number }}
+                </label>
+                <strong style="color:green;">Available</strong>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <button type="submit">Book Selected Seats</button>
+</form>
+
+{% endblock %}
