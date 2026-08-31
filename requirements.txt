@@ -8,3 +8,4 @@ typing_extensions==4.7.0
 celery
 razorpay
 reportlab
+qrcode
