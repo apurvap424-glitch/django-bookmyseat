@@ -1,0 +1,100 @@
+{% extends "users/basic.html" %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <h2 class="text-center mb-5">My Booking History</h2>
+
+    {% if bookings %}
+
+        <div class="row">
+
+            {% for booking in bookings %}
+
+            <div class="col-md-6 mb-4">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-body">
+
+                        <h5 class="card-title">
+                            {{ booking.movie.name }}
+                        </h5>
+
+                        <hr>
+
+                        <p>
+                            <strong>Theater:</strong>
+                            {{ booking.theater.name }}
+                        </p>
+
+                        <p>
+                            <strong>Screen:</strong>
+                            {{ booking.theater.screen }}
+                        </p>
+
+                        <p>
+                            <strong>Seat:</strong>
+                            {{ booking.seat.seat_number }}
+                        </p>
+
+                        <p>
+                            <strong>Show Time:</strong>
+                            {{ booking.theater.time|date:"d M Y, h:i A" }}
+                        </p>
+
+                        <p>
+                            <strong>Booking ID:</strong><br>
+                            <small>{{ booking.booking_id }}</small>
+                        </p>
+
+                        <p>
+                            <strong>Payment Reference:</strong>
+                            {{ booking.payment_reference }}
+                        </p>
+
+                        <p>
+                            <strong>Booked On:</strong>
+                            {{ booking.booked_at|date:"d M Y, h:i A" }}
+                        </p>
+
+                        <!-- DOWNLOAD PDF TICKET -->
+
+                        <a
+                            href="{% url 'download_ticket' booking.booking_id %}"
+                            class="btn btn-primary"
+                        >
+                            Download Ticket PDF
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="text-center">
+
+            <p>You haven't booked any tickets yet.</p>
+
+            <a
+                href="{% url 'movie_list' %}"
+                class="btn btn-primary"
+            >
+                Browse Movies
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

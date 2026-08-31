@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment</title>
+
+    <style>
+        #reservation-timer {
+            color: red;
+        }
+
+        #payment-message {
+            font-weight: bold;
+            color: red;
+        }
+
+        #pay-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Complete Your Payment</h2>
+
+<p>
+    Movie: {{ theater.movie.name }}
+</p>
+
+<p>
+    Seats:
+
+    {% for seat in seats %}
+        {{ seat.seat_number }}
+    {% endfor %}
+</p>
+
+<h3>
+    Total: ₹{{ total_amount }}
+</h3>
+
+<h3 id="reservation-timer">
+    Your seats are reserved for 2:00
+</h3>
+
+<button id="pay-btn">
+    Pay Now
+</button>
+
+<p id="payment-message"></p>
+
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+
+var options = {
+
+    "key": "{{ razorpay_key_id }}",
+
+    "amount": "{{ total_amount|floatformat:0 }}00",
+
+    "currency": "INR",
+
+    "name": "BookMySeat",
+
+    "description": "Movie Ticket Booking",
+
+    "order_id": "{{ razorpay_order_id }}",
+
+
+    /* PAYMENT SUCCESS */
+
+    "handler": function (response) {
+
+        var form = document.createElement("form");
+
+        form.method = "POST";
+
+        form.action = "{% url 'payment_success' %}";
+
+
+        /* CSRF TOKEN */
+
+        var csrf = document.createElement("input");
+
+        csrf.type = "hidden";
+
+        csrf.name = "csrfmiddlewaretoken";
+
+        csrf.value = "{{ csrf_token }}";
+
+        form.appendChild(csrf);
+
+
+        /* PAYMENT ID */
+
+        var paymentId = document.createElement("input");
+
+        paymentId.type = "hidden";
+
+        paymentId.name = "razorpay_payment_id";
+
+        paymentId.value = response.razorpay_payment_id;
+
+        form.appendChild(paymentId);
+
+
+        /* ORDER ID */
+
+        var orderId = document.createElement("input");
+
+        orderId.type = "hidden";
+
+        orderId.name = "razorpay_order_id";
+
+        orderId.value = response.razorpay_order_id;
+
+        form.appendChild(orderId);
+
+
+        /* SIGNATURE */
+
+        var signature = document.createElement("input");
+
+        signature.type = "hidden";
+
+        signature.name = "razorpay_signature";
+
+        signature.value = response.razorpay_signature;
+
+        form.appendChild(signature);
+
+
+        document.body.appendChild(form);
+
+        form.submit();
+    },
+
+
+    /* PAYMENT CANCELLED / POPUP CLOSED */
+
+    "modal": {
+
+        "ondismiss": function () {
+
+            var message = document.getElementById(
+                "payment-message"
+            );
+
+            message.innerHTML =
+                "Payment cancelled. Releasing your seats...";
+
+
+            var form = document.createElement("form");
+
+            form.method = "POST";
+
+            form.action =
+             "{% url 'payment_cancelled' %}";
+
+
+            /* CSRF TOKEN */
+
+            var csrf = document.createElement("input");
+
+            csrf.type = "hidden";
+
+            csrf.name = "csrfmiddlewaretoken";
+
+            csrf.value = "{{ csrf_token }}";
+
+            form.appendChild(csrf);
+
+
+            /* ORDER ID */
+
+            var orderId = document.createElement("input");
+
+            orderId.type = "hidden";
+
+            orderId.name = "razorpay_order_id";
+
+            orderId.value =
+                "{{ razorpay_order_id }}";
+
+            form.appendChild(orderId);
+
+
+            document.body.appendChild(form);
+
+            form.submit();
+        }
+    },
+
+
+    "theme": {
+
+        "color": "#3399cc"
+    }
+};
+
+
+var rzp = new Razorpay(options);
+
+
+/* PAY BUTTON */
+
+document.getElementById("pay-btn").onclick =
+    function (e) {
+
+        rzp.open();
+
+        e.preventDefault();
+    };
+
+
+/* 2-MINUTE RESERVATION COUNTDOWN */
+
+const reservationUntil =
+    "{{ reservation_until|default:'' }}";
+
+
+if (reservationUntil) {
+
+    const reservationTime =
+        new Date(reservationUntil).getTime();
+
+    const timerElement =
+        document.getElementById(
+            "reservation-timer"
+        );
+
+
+    const countdown =
+        setInterval(function () {
+
+            const now =
+                new Date().getTime();
+
+            const remaining =
+                reservationTime - now;
+
+
+            /* RESERVATION EXPIRED */
+
+            if (remaining <= 0) {
+
+                clearInterval(countdown);
+
+                timerElement.innerHTML =
+                    "Reservation expired. Please select seats again.";
+
+                document.getElementById(
+                    "pay-btn"
+                ).disabled = true;
+
+
+                document.getElementById(
+                    "payment-message"
+                ).innerHTML =
+                    "Your seat reservation has expired.";
+
+                return;
+            }
+
+
+            /* CALCULATE MINUTES */
+
+            const minutes =
+                Math.floor(
+                    remaining / (1000 * 60)
+                );
+
+
+            /* CALCULATE SECONDS */
+
+            const seconds =
+                Math.floor(
+                    (remaining % (1000 * 60))
+                    / 1000
+                );
+
+
+            /* DISPLAY COUNTDOWN */
+
+            timerElement.innerHTML =
+                "Seats reserved for: "
+                + minutes
+                + ":"
+                + String(seconds).padStart(
+                    2,
+                    "0"
+                );
+
+        }, 1000);
+}
+
+</script>
+
+</body>
+</html>

@@ -1,14 +1,351 @@
 {% extends "users/basic.html" %}
 
 {% block content %}
-<h1>Theater for {{movie.name}}</h1>
-<ul>
-    {% for theater in theaters %}
-    <li>
-        <strong>{{theater.name}}</strong>{{theater.time}}
-        
-        <a href="% url 'seat_list' theater.id %">view Seats</a>
-        </li>
+
+<div class="container mt-4">
+
+    <!-- Movie Name -->
+    <h1>{{ movie.name }}</h1>
+
+    <!-- Movie Posters -->
+    {% if movie.posters.all %}
+        <h3 class="mt-4">Movie Posters</h3>
+
+        <div class="row">
+            {% for poster in movie.posters.all %}
+                <div class="col-md-4 mb-3">
+                    <img
+                        src="{{ poster.image.url }}"
+                        alt="{{ movie.name }} Poster"
+                        class="img-fluid rounded shadow"
+                        style="width: 100%; height: 400px; object-fit: cover;"
+                    >
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+
+    <!-- Movie Trailer -->
+    {% if movie.trailer_url %}
+        <div class="mt-5 mb-5">
+
+            <h3>Movie Trailer</h3>
+
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe
+                    class="embed-responsive-item"
+                    src="{{ movie.trailer_url }}"
+                    title="{{ movie.name }} Trailer"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen>
+                </iframe>
+            </div>
+
+            <a href="{{ movie.trailer_url }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="btn btn-danger mt-3">
+                ▶ Watch on YouTube
+            </a>
+
+        </div>
+    {% endif %}
+
+
+    <!-- Theaters -->
+    <h3 class="mt-4">Available Theaters</h3>
+
+    <ul>
+        {% for theater in theaters %}
+            <li class="mb-2">
+                <strong>{{ theater.name }}</strong>
+                - {{ theater.city }}
+                - {{ theater.screen }}
+                - {{ theater.time }}
+
+                <a href="{% url 'book_seats' theater.id %}"
+                   class="btn btn-primary btn-sm ms-2">
+                    View Seats
+                </a>
+            </li>
+        {% empty %}
+            <li>No theaters available.</li>
         {% endfor %}
-      </ul>
-      {% endblock %}
+    </ul>
+
+
+    <!-- Review Button -->
+    <div class="mt-4">
+
+        {% if user.is_authenticated %}
+
+            {% if user_review %}
+                <a href="{% url 'add_review' movie.id %}"
+                   class="btn btn-warning">
+                    ✏️ Edit Your Review
+                </a>
+            {% else %}
+                <a href="{% url 'add_review' movie.id %}"
+                   class="btn btn-primary">
+                    ⭐ Write a Review
+                </a>
+            {% endif %}
+
+        {% else %}
+
+            <a href="{% url 'login' %}"
+               class="btn btn-secondary">
+                Login to Review
+            </a>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Reviews -->
+    <hr class="my-5">
+
+    <h2>⭐ Movie Reviews</h2>
+
+
+    <!-- Average Rating -->
+    {% if average_rating %}
+        <h4 class="mb-4">
+            Average Rating:
+            ⭐ {{ average_rating|floatformat:1 }}/5
+        </h4>
+    {% else %}
+        <p>No reviews yet.</p>
+    {% endif %}
+
+
+    <!-- Individual Reviews -->
+    {% for review in reviews %}
+
+        <div class="card mb-3 p-3">
+
+            <h5>
+                {{ review.user.username }}
+
+                {% if review.is_verified %}
+                    <span class="badge bg-success">
+                        ✓ Verified Viewer
+                    </span>
+                {% endif %}
+            </h5>
+
+            <div>
+                ⭐ {{ review.rating }}/5
+            </div>
+
+            <p class="mt-2">
+                {{ review.comment }}
+            </p>
+
+            <small class="text-muted">
+                {{ review.created_at|date:"d M Y" }}
+            </small>
+
+            {% if user.is_authenticated %}
+    <form method="POST"
+          action="{% url 'report_review' review.id %}"
+          class="mt-2">
+        {% csrf_token %}
+
+        <button type="submit"
+                class="btn btn-outline-danger btn-sm">
+            🚩 Report Review
+        </button>
+    </form>
+{% endif %}
+
+        </div>
+
+    {% empty %}
+
+        <p>
+            No reviews yet. Be the first to review this movie!
+        </p>
+
+    {% endfor %}
+
+</div>
+
+<!-- Similar Movies -->
+<hr class="my-5">
+
+<h2>🎬 Similar Movies</h2>
+
+<div class="row">
+
+    {% for similar in similar_movies %}
+
+        <div class="col-md-4 mb-4">
+
+            <div class="card h-100">
+
+                {% if similar.image %}
+                    <img
+                        src="{{ similar.image.url }}"
+                        class="card-img-top"
+                        style="height: 300px; object-fit: cover;"
+                        alt="{{ similar.name }}"
+                    >
+                {% endif %}
+
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        {{ similar.name }}
+                    </h5>
+
+                    <p>
+                        ⭐ {{ similar.rating }}/5
+                    </p>
+
+                    <a
+                        href="{% url 'theater' similar.id %}"
+                        class="btn btn-primary"
+                    >
+                        View Movie
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% empty %}
+
+        <p>No similar movies available.</p>
+
+    {% endfor %}
+
+</div>
+
+
+<!-- Trending Movies -->
+<hr class="my-5">
+
+<h2>🔥 Trending Movies</h2>
+
+<div class="row">
+
+    {% for trending in trending_movies %}
+
+        <div class="col-md-4 mb-4">
+
+            <div class="card h-100">
+
+                {% if trending.image %}
+                    <img
+                        src="{{ trending.image.url }}"
+                        class="card-img-top"
+                        style="height: 300px; object-fit: cover;"
+                        alt="{{ trending.name }}"
+                    >
+                {% endif %}
+
+                <div class="card-body">
+
+                    <h5>
+                        {{ trending.name }}
+                    </h5>
+
+                    <p>
+                        ⭐ {{ trending.rating }}/5
+                    </p>
+
+                    <a
+                        href="{% url 'theater' trending.id %}"
+                        class="btn btn-primary"
+                    >
+                        View Movie
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% empty %}
+
+        <p>No trending movies available.</p>
+
+    {% endfor %}
+
+</div>
+
+
+<!-- Recently Released -->
+<hr class="my-5">
+
+<h2>🆕 Recently Released</h2>
+
+<div class="row">
+
+    {% for recent in recently_released %}
+
+        <div class="col-md-4 mb-4">
+
+            <div class="card h-100">
+
+                {% if recent.image %}
+                    <img
+                        src="{{ recent.image.url }}"
+                        class="card-img-top"
+                        style="height: 300px; object-fit: cover;"
+                        alt="{{ recent.name }}"
+                    >
+                {% endif %}
+
+                <div class="card-body">
+
+                    <h5>
+                        {{ recent.name }}
+                    </h5>
+
+                    <p>
+                        📅 {{ recent.release_date }}
+                    </p>
+
+                    <p>
+                        ⭐ {{ recent.rating }}/5
+                    </p>
+
+                    <a
+                        href="{% url 'theater' recent.id %}"
+                        class="btn btn-primary"
+                    >
+                        View Movie
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% empty %}
+
+        <p>No recently released movies available.</p>
+
+    {% endfor %}
+
+</div>
+
+<hr>
+
+<h2>TEST</h2>
+
+<p>Similar Movies: {{ similar_movies|length }}</p>
+<p>Trending Movies: {{ trending_movies|length }}</p>
+<p>Recently Released: {{ recently_released|length }}</p>
+
+{% endblock %}

@@ -5,57 +5,277 @@
     <h1 class="text-center mb-5">Movies</h1>
 
     <div class="row justify-content-center mb-5">
-        <div class="col-md-8">
-            <form method="GET" action="{% url 'movie_list' %}" class="search-bar">
-                <div class="input-group">
-                    <input
-                        class="form-control form-control-lg"
-                        name="search"
-                        placeholder="Search for Movies, Events, Plays, Sports and Activities"
-                        type="text"
-                        value="{{ request.GET.search|default_if_none:'' }}"
-                        aria-label="Search for movies"
-                    />
-                    <div class="input-group-append">
-                        <button class="btn btn-primary" type="submit">
-                            <i class="fas fa-search"></i> Search
-                        </button>
-                    </div>
-                </div>
-            </form>
+        <div class="col-md-8"><form method="GET" action="{% url 'movie_list' %}">
+    <div class="row">
+
+        <div class="col-md-3">
+            <input type="text"
+                   class="form-control"
+                   name="search"
+                   placeholder="Search Movie"
+                   value="{{ request.GET.search }}">
+        </div>
+
+        <div class="col-md-2">
+            <select class="form-control" name="genre">
+                <option value="">Genre</option>
+                <option value="Action">Action</option>
+                <option value="Comedy">Comedy</option>
+                <option value="Drama">Drama</option>
+                <option value="Horror">Horror</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select class="form-control" name="language">
+                <option value="">Language</option>
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Marathi">Marathi</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select class="form-control" name="city">
+                <option value="">City</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Pune">Pune</option>
+                <option value="Panvel">Panvel</option>
+            </select>
+        </div>
+
+        <div>
+            <select class="form-control" name="theater">
+                <option value="">Theater</option>
+                <option value="PVR">PVR</option>
+                <option value="SCM">SCM</option>
+                <option value="INOX">INOX</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <input type="date"
+            class="form-control"
+            name="release_date"
+            value="{{ request.GET.release_date }}">
+        </div>
+
+
+        <div class="col-md-2">
+            <select class="form-control" name="rating">
+                <option value="">Rating</option>
+                <option value="4">4+ Stars</option>
+                <option value="3">3+ Stars</option>
+                <option value="2">2+ Stars</option>
+            </select>
+        </div>
+
+<div class="col-md-2">
+    <select class="form-control" name="time">
+        <option value="">Show Time</option>
+        <option value="morning">Morning</option>
+        <option value="afternoon">Afternoon</option>
+        <option value="evening">Evening</option>
+        <option value="night">Night</option>
+    </select>
+</div>
+
+<div class="col-md-3">
+    <select class="form-control" name="sort">
+                <option value="">Sort By</option>
+                <option value="rating">Highest Rating</option>
+                <option value="newest">Newest</option>
+                <option value="price">Lowest Price</option>
+                <option value="popular">Popularity</option>
+            </select>
+        </div>
+
+    </div>
+
+    <br>
+
+    <button type="submit" class="btn btn-primary">
+    Search
+</button>
+
+<p class="mt-3">
+    <strong>{{ movie_count }}</strong> movies found
+</p>
+
+</form>
+        </div>
+    </div>
+<p class="text-muted">
+    {{ movie_count }} movie{{ movie_count|pluralize }} found
+</p>
+
+<!-- MAIN MOVIE RESULTS -->
+<div class="row" id="movieList">
+    {% for movie in movies %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+
+            {% if movie.image %}
+            <img src="{{ movie.image.url }}"
+                 class="card-img-top"
+                 alt="{{ movie.name }}"
+                 style="height: 300px; object-fit: cover;">
+            {% endif %}
+
+            <div class="card-body">
+                <h5 class="card-title">{{ movie.name }}</h5>
+
+                <p class="card-text">
+                    <i class="fas fa-star text-warning"></i>
+                    {{ movie.rating }}
+                </p>
+
+                <p class="card-text">
+                    <small class="text-muted">
+                        {{ movie.genre }} | {{ movie.language }}
+                    </small>
+                </p>
+
+                <p class="card-text">
+                    <small class="text-muted">
+                        <i class="fas fa-users"></i>
+                        Cast: {{ movie.cast }}
+                    </small>
+                </p>
+            </div>
+
+            <div class="card-footer bg-white border-top-0">
+                <a href="{% url 'theater' movie.id %}"
+                   class="btn btn-outline-primary btn-block">
+                    View Theaters
+                    <i class="fas fa-chevron-right ml-2"></i>
+                </a>
+            </div>
+
         </div>
     </div>
 
-    <div class="row" id="movieList">
-        {% for movie in movies %}
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm">
-                <img src="{{ movie.image.url }}" class="card-img-top" alt="{{ movie.name }}" style="height: 300px; object-fit: cover;">
-                <div class="card-body">
-                    <h5 class="card-title">{{ movie.name }}</h5>
-                    <p class="card-text">
-                        <i class="fas fa-star text-warning"></i> {{ movie.rating }}
-                    </p>
-                    <p class="card-text">
-                        <small class="text-muted">
-                            <i class="fas fa-users"></i> Cast: {{ movie.cast }}
-                        </small>
-                    </p>
-                </div>
-                <div class="card-footer bg-white border-top-0">
-                    <a href="{% url 'theater' movie.id %}" class="btn btn-outline-primary btn-block">
-                        View Theaters <i class="fas fa-chevron-right ml-2"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="col-12 text-center">
-            <p class="lead">No movies found. Try a different search term.</p>
-        </div>
-        {% endfor %}
+    {% empty %}
+    <div class="col-12 text-center">
+        <p class="lead">
+            No movies found. Try a different search term.
+        </p>
     </div>
+    {% endfor %}
 </div>
+
+{% if movies.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+
+        {% if movies.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ movies.previous_page_number }}">
+                Previous
+            </a>
+        </li>
+        {% endif %}
+
+        {% for num in movies.paginator.page_range %}
+            <li class="page-item {% if movies.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">
+                    {{ num }}
+                </a>
+            </li>
+        {% endfor %}
+
+        {% if movies.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ movies.next_page_number }}">
+                Next
+            </a>
+        </li>
+        {% endif %}
+
+    </ul>
+</nav>
+{% endif %}
+
+{% if recommended_movies %}
+<h2 class="mb-4">Recommended for You ⭐</h2>
+
+<div class="row">
+    {% for movie in recommended_movies %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+
+            <img src="{{ movie.image.url }}"
+                 class="card-img-top"
+                 alt="{{ movie.name }}"
+                 style="height: 300px; object-fit: cover;">
+
+            <div class="card-body">
+                <h5 class="card-title">{{ movie.name }}</h5>
+
+                <p class="card-text">
+                    ⭐ {{ movie.rating }}
+                </p>
+
+                <p class="card-text">
+                    <small class="text-muted">
+                        {{ movie.genre }} | {{ movie.language }}
+                    </small>
+                </p>
+            </div>
+
+            <div class="card-footer bg-white border-top-0">
+                <a href="{% url 'theater' movie.id %}"
+                   class="btn btn-outline-primary btn-block">
+                    View Theaters
+                </a>
+            </div>
+
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if recently_viewed_movies %}
+<h2 class="mb-4 mt-5">Recently Viewed Movies 👀</h2>
+
+<div class="row">
+    {% for movie in recently_viewed_movies %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+
+            <img src="{{ movie.image.url }}"
+                 class="card-img-top"
+                 alt="{{ movie.name }}"
+                 style="height: 300px; object-fit: cover;">
+
+            <div class="card-body">
+                <h5 class="card-title">{{ movie.name }}</h5>
+
+                <p class="card-text">
+                    ⭐ {{ movie.rating }}
+                </p>
+
+                <p class="card-text">
+                    <small class="text-muted">
+                        {{ movie.genre }} | {{ movie.language }}
+                    </small>
+                </p>
+            </div>
+
+            <div class="card-footer bg-white border-top-0">
+                <a href="{% url 'theater' movie.id %}"
+                   class="btn btn-outline-primary btn-block">
+                    View Theaters
+                </a>
+            </div>
+
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 
 <!-- Bootstrap JS and dependencies -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -97,17 +317,4 @@
         });
     });
 </script>
-<!-- <h1>Movies</h1>
-<ul>
-    {% for movie in movies%}
-    <li>
-        <img src="{{movie.image.url}}" alt="image" >
-        <strong>{{movie.name}}</strong>{{movie.rating}}
-        <p>Cast:{{movie.cast}}</p>
-        <a href="{% url 'theater' movie.id %}" class="btn btn-outline-primary btn-block">
-                        View Theaters <i class="fas fa-chevron-right ml-2"></i>
-                    </a>
-    </li>
-    {% endfor %}
-</ul> -->
-{% endblock %}
+ {% endblock %}

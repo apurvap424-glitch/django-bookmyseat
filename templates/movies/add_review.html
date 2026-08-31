@@ -1,0 +1,48 @@
+{% extends "users/basic.html" %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <h2>Review {{ movie.name }}</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">Rating</label>
+
+            <select name="rating" class="form-control" required>
+                <option value="">Select Rating</option>
+                <option value="1">⭐ 1 Star</option>
+                <option value="2">⭐⭐ 2 Stars</option>
+                <option value="3">⭐⭐⭐ 3 Stars</option>
+                <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+                <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Your Review</label>
+
+            <textarea
+                name="comment"
+                class="form-control"
+                rows="5"
+                placeholder="Write your review..."
+                required>{% if existing_review %}{{ existing_review.comment }}{% endif %}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            {% if existing_review %}
+                Update Review
+            {% else %}
+                Submit Review
+            {% endif %}
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

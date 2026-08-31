@@ -1,4 +1,5 @@
 from django.urls import path
+from movies import views
 from .views import register, login_view, profile, reset_password, home
 from django.contrib.auth import views as auth_views
 
@@ -25,4 +26,5 @@ urlpatterns = [
     path('password-reset-complete/',
          auth_views.PasswordResetCompleteView.as_view(template_name='users/password_reset_complete.html'),
          name='password_reset_complete'),
+     path('payment-success/', views.payment_success, name='payment_success'),
 ]
