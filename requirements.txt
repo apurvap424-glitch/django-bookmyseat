@@ -9,3 +9,6 @@ celery
 razorpay
 reportlab
 qrcode
+cloudinary
+django-cloudinary-storage
+Pillow
