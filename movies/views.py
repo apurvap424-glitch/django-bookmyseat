@@ -763,7 +763,7 @@ def payment_success(request):
                 booking_id = booking.id
                 transaction.on_commit(
                      lambda booking_id=booking_id:
-                     generate_and_send_ticket.delay(booking_id)
+                     generate_and_send_ticket(booking_id)
                 )
 
             # Update payment
