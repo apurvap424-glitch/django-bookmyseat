@@ -1,17 +1,18 @@
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
 import qrcode
+from io import BytesIO
 
 
-def generate_ticket(booking, file_path):
+def generate_ticket(booking, output):
 
-    c = canvas.Canvas(file_path, pagesize=A4)
+    c = canvas.Canvas(output, pagesize=A4)
 
     width, height = A4
 
-    
-
+    # Header
     c.setFont("Helvetica-Bold", 22)
     c.drawCentredString(
         width / 2,
@@ -26,8 +27,7 @@ def generate_ticket(booking, file_path):
         "MOVIE TICKET"
     )
 
-    
-
+    # Booking details
     c.setFont("Helvetica", 12)
 
     y = height - 75 * mm
@@ -48,8 +48,7 @@ def generate_ticket(booking, file_path):
         c.drawString(35 * mm, y, detail)
         y -= 10 * mm
 
-    
-
+    # QR code
     qr_data = (
         f"Booking ID: {booking.booking_id}\n"
         f"Payment Reference: {booking.payment_reference}\n"
@@ -59,19 +58,19 @@ def generate_ticket(booking, file_path):
 
     qr = qrcode.make(qr_data)
 
-    qr_path = f"{file_path}_qr.png"
-    qr.save(qr_path)
+    qr_buffer = BytesIO()
+    qr.save(qr_buffer, format="PNG")
+    qr_buffer.seek(0)
 
     c.drawImage(
-        qr_path,
+        ImageReader(qr_buffer),
         width - 70 * mm,
         35 * mm,
         width=40 * mm,
         height=40 * mm
     )
 
-    
-
+    # Footer
     c.setFont("Helvetica-Bold", 11)
 
     c.drawString(

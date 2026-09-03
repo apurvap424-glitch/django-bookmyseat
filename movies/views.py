@@ -1219,31 +1219,16 @@ def download_ticket(request, booking_id):
         user=request.user
     )
 
-    ticket_path = os.path.join(
-        settings.MEDIA_ROOT,
-        'tickets',
-        f'ticket_{booking.booking_id}.pdf'
-    )
-
-    if not os.path.exists(ticket_path):
-
+    if not booking.ticket_url:
         return HttpResponse(
             "Ticket PDF not found."
         )
 
-    with open(
-        ticket_path,
-        'rb'
-    ) as ticket_file:
-
-        response = HttpResponse(
-            ticket_file.read(),
-            content_type='application/pdf'
-        )
-
-    response['Content-Disposition'] = (
-        f'attachment; filename="ticket_{booking.booking_id}.pdf"'
+    response = HttpResponse(
+        status=302
     )
+
+    response["Location"] = booking.ticket_url
 
     return response
 

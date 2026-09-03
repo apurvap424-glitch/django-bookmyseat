@@ -128,6 +128,12 @@ class Booking(models.Model):
         on_delete=models.CASCADE
     )
 
+    ticket_url = models.URLField(
+        blank=True,
+        null=True
+    )
+
+
     booked_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
