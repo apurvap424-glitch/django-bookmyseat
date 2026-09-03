@@ -64,7 +64,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = os.getenv("apurvapatil4817@gmail.com")
-EMAIL_HOST_PASSWORD = os.getenv("Krqsitgjojcjvqpx")
+EMAIL_HOST_PASSWORD = os.getenv("qdfi ughk zscw hulc")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
