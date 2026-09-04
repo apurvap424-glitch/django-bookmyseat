@@ -1527,9 +1527,9 @@ def admin_dashboard(request):
             'seats',
             distinct=True
         ),
-        booked_seats=Count(
-            'seats__booking',
-            distinct=True
+       booked_seats=Count(
+           'seats__bookings',
+           distinct=True
         )
     )
 
